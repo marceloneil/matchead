@@ -21,5 +21,10 @@ app.controller('MainCtrl', [
           $scope.posts.push({title: $scope.title, upvotes: 0});  
           $scope.title = "";
         };
+        
+        //upvote a post
+        $scope.incrementUpvotes = function(post){
+          post.upvotes += 1;  
+        };
     }
 ]);
