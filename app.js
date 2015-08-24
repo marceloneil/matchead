@@ -41,8 +41,21 @@ app.controller('PostsCtrl', [
 '$scope',
 '$stateParams',
 'posts',
-function($scope, $stateParams, posts){ //has acces to posts factory
+function($scope, $stateParams, posts){ //has access to posts factory
     $scope.posts = posts.posts[$stateParams.id];
+    
+    //add a comment to a post
+    $scope.addComment = function(){
+      if($scope.body === '') {
+        return;
+      }
+      $scope.post.comments.push({
+        body: $scope.body,
+        author: 'user',
+        upvotes: 0
+      });
+      $scope.body = '';
+    };
     
 }]);
 
