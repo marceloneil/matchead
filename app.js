@@ -10,7 +10,7 @@ var users = require('./routes/users');
 
 //Connect to MongoDB Mongoose instance
 var mongoose = require("mongoose");
-mongoose.connect("mongodb://kshen3778:qazwsx1703@" + process.env.IP + ":" + process.env.PORT + "/news");
+mongoose.connect("mongodb://kshen3778@gmail.com:qazwsx1703@" + process.env.IP + ":" + process.env.PORT + "/news");
 
 var app = express();
 
