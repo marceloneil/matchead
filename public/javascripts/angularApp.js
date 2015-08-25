@@ -42,7 +42,7 @@ app.controller('PostsCtrl', [
 '$stateParams',
 'posts',
 function($scope, $stateParams, posts){ //has access to posts factory
-    $scope.posts = posts.posts[$stateParams.id];
+    $scope.post = posts.posts[$stateParams.id];
 
     //add a comment to a post
     $scope.addComment = function(){
@@ -56,7 +56,12 @@ function($scope, $stateParams, posts){ //has access to posts factory
       });
       $scope.body = '';
     };
-
+    
+    //upvote a comment
+    $scope.incrementUpvotes = function(comment){
+      comment.upvotes += 1;
+    };
+    
 }]);
 
 app.config([
