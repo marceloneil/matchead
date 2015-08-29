@@ -33,6 +33,7 @@ router.post('/posts', function(req, res, next){
    
 });
 
+//preload posts
 router.param('post', function(req,res,next,id){
    var query = Post.findById(id); //find the post
    
@@ -50,9 +51,12 @@ router.param('post', function(req,res,next,id){
    });
 });
 
-//retrieve a specific post
-router.get('/posts/:post', function(req,res){
-   res.json(req.post); 
+//retrieve a specific post along with its comments
+router.get('/posts/:post', function(req,res,next){
+   req.post.populate('comments', function(err, post){
+      if(err) { return next(err); }
+      res.json(req.post); 
+   });
 });
 
 //upvote a post
@@ -62,6 +66,55 @@ router.put('/posts/:post/upvote', function(req,res,next){
           return next(err);
       }
       res.json(post);
+   });
+});
+
+//create comment route for a post
+router.post('/posts/:post/comments', function(req, res, next){
+   var comment = new Comment(req.body);
+   comment.post = req.post; //set the Comment Schema's post field to the selected post
+   
+   comment.save(function(err, comment){
+      if(err){
+         return next(err);
+      }
+      req.post.comments.push(comment); //push the comment into the Post Schema's comments field
+      req.post.save(function(err,post){
+         if(err){
+            return next(err);
+         }
+         res.json(comment);
+      });
+      
+   });
+});
+
+//preload comment specified by any :comment route parameters
+router.param('comment', function(req,res,next,id){
+   var query = Comment.findById(id); //find the comment
+   
+   // try to get the post details from the Posts model and attach it to the request object
+   query.exec(function(err, comment){
+      if(err){
+          return next(err);
+      }
+      if(!comment){
+          return next(new Error('can\'t find comment'));
+      }
+      
+      req.comment = comment;
+      return next();
+   });
+});
+
+//upvote a comment
+router.put('/posts/:post/comments/:comment/upvote', function(req,res,next){
+   //call Comment schema's upvote method
+   req.comment.upvote(function(err, comment){
+      if(err){
+          return next(err);
+      }
+      res.json(comment);
    });
 });
 
