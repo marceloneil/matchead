@@ -77,7 +77,7 @@ app.controller('PostsCtrl', [
 'posts',
 'post',
 function($scope, posts, post){ //has access to posts factory
-    $scope.post = post;
+    $scope.post = post; //$scope.post two way binding to the frontend ng-repeat=post in posts
 
     //add a comment to a post
     $scope.addComment = function(){
@@ -122,7 +122,7 @@ function($stateProvider, $urlRouterProvider){
     $stateProvider.state('posts', {
       url: '/posts/{id}',
       templateUrl: '/posts.html',
-      controller: 'PostsCtrl',
+      controller: 'PostsCtrl', //posts will be controlled with PostCtrl
       resolve: {
         post: ['$stateParams', 'posts', function($stateParams, posts){
           return posts.get($stateParams.id);

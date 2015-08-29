@@ -109,7 +109,7 @@ router.param('comment', function(req,res,next,id){
 
 //upvote a comment
 router.put('/posts/:post/comments/:comment/upvote', function(req,res,next){
-   //call Comment schema's upvote method
+   //call Comment schema's upvote method on :comment
    req.comment.upvote(function(err, comment){
       if(err){
           return next(err);
