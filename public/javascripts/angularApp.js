@@ -3,15 +3,22 @@ app.factory('posts', ['$http', function($http){
   var o = {
     posts: []
   };
-  //query to get('/posts') route
+  //query to get('/posts') route to load all posts
   o.getAll = function(){
     return $http.get('/posts').success(function(data){
       angular.copy(data, o.posts); //copy returned data to the client side posts list
     });
   };
+  //query to post('/posts') route to create post
+  o.create = function(post){
+    return $http.post('/posts', post).success(function(data){
+      o.posts.push(data);
+    });
+  };
   return o;
 }]);
 
+//controls posts
 app.controller('MainCtrl', [
     '$scope',
     'posts',
@@ -25,12 +32,11 @@ app.controller('MainCtrl', [
               return;
           }
 
-          $scope.posts.push({title: $scope.title, link: $scope.link, upvotes: 0,
-            comments: [
-              {author: 'Joe', body: 'Cool post!', upvotes: 0},
-              {author: 'Bob', body: 'Great idea but everything is wrong!', upvotes: 0}
-            ]
+          posts.create({
+            title: $scope.title,
+            link: $scope.link
           });
+          
           $scope.title = "";
           $scope.link = "";
         };
@@ -42,7 +48,7 @@ app.controller('MainCtrl', [
     }
 ]);
 
-//will control posts and comments
+//will control a post's comments
 app.controller('PostsCtrl', [
 '$scope',
 '$stateParams',
