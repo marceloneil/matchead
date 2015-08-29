@@ -20,7 +20,24 @@ app.factory('posts', ['$http', function($http){
     return $http.put('/posts/' + post._id + '/upvote').success(function(data){
       post.upvotes += 1;
     });
-  }
+  };
+  //retrieve a single post
+  o.get = function(id){
+    return $http.get('/posts/' + id).then(function(res){
+      return res.data;
+    });
+  };
+  //adding comments
+  o.addComment = function(id, comment){
+    return $http.post('/posts/' + id + '/comments', comment);
+  };
+  //upvote comments
+  o.upvoteComment = function(post, comment){
+    return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/upvote').success(function(data){
+      comment.upvotes += 1;
+    });
+  };
+  
   return o;
 }]);
 
@@ -57,27 +74,28 @@ app.controller('MainCtrl', [
 //will control a post's comments
 app.controller('PostsCtrl', [
 '$scope',
-'$stateParams',
 'posts',
-function($scope, $stateParams, posts){ //has access to posts factory
-    $scope.post = posts.posts[$stateParams.id];
+'post',
+function($scope, posts, post){ //has access to posts factory
+    $scope.post = post;
 
     //add a comment to a post
     $scope.addComment = function(){
       if($scope.body === '') {
         return;
       }
-      $scope.post.comments.push({
+      posts.addComment(post._id, {
         body: $scope.body,
         author: 'user',
-        upvotes: 0
+      }).success(function(comment){
+        $scope.post.comments.push(comment);
       });
       $scope.body = '';
     };
     
     //upvote a comment
     $scope.incrementUpvotes = function(comment){
-      comment.upvotes += 1;
+      posts.upvoteComment(post, comment);
     };
     
 }]);
@@ -104,7 +122,12 @@ function($stateProvider, $urlRouterProvider){
     $stateProvider.state('posts', {
       url: '/posts/{id}',
       templateUrl: '/posts.html',
-      controller: 'PostsCtrl'
+      controller: 'PostsCtrl',
+      resolve: {
+        post: ['$stateParams', 'posts', function($stateParams, posts){
+          return posts.get($stateParams.id);
+        }]
+      }
     });
 
     $urlRouterProvider.otherwise('home');
