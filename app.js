@@ -5,8 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-//var routes = require('./routes/index');
-//var users = require('./routes/users');
+var passport = require('passport');
 
 //Connect to MongoDB Mongoose instance
 var mongoose = require("mongoose");
@@ -16,10 +15,14 @@ var mongoose = require("mongoose");
 mongoose.connect("mongodb://kshen3778-mean-news-app-1800429:27017/news");
 require('./models/Posts');
 require('./models/Comments');
+require('./models/User');
+require('./config/passport');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+app.use(passport.initialize());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
