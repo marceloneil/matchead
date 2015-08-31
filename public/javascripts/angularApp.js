@@ -198,8 +198,8 @@ function($scope, $state, auth){
   };
   
   //calls the login method in auth factory
-  $scope.login = function(){
-    auth.login($scope.user).error(function(error){
+  $scope.logIn = function(){
+    auth.logIn($scope.user).error(function(error){
       $scope.error = error;
     }).then(function(){ //if no errors, promise the user home
       $state.go('home');
