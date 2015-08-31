@@ -1,5 +1,5 @@
 var app = angular.module('flapperNews', ['ui.router']);
-app.factory('posts', ['$http', function($http){
+app.factory('posts', ['$http', 'auth', function($http, auth){
   var o = {
     posts: []
   };
@@ -11,13 +11,19 @@ app.factory('posts', ['$http', function($http){
   };
   //query to post('/posts') route to create post
   o.create = function(post){
-    return $http.post('/posts', post).success(function(data){
+    return $http.post('/posts', post, {
+      //pass auth JWT token as an Authorization header
+      headers: {Authorization: 'Bearer ' + auth.getToken()}
+    }).success(function(data){
       o.posts.push(data);
     });
   };
   //query to upvote post route
   o.upvote = function(post){
-    return $http.put('/posts/' + post._id + '/upvote').success(function(data){
+    return $http.put('/posts/' + post._id + '/upvote', null, {
+      //pass auth JWT token as an Authorization header
+      headers: {Authorization: 'Bearer ' + auth.getToken()}
+    }).success(function(data){
       post.upvotes += 1;
     });
   };
@@ -29,11 +35,17 @@ app.factory('posts', ['$http', function($http){
   };
   //adding comments
   o.addComment = function(id, comment){
-    return $http.post('/posts/' + id + '/comments', comment);
+    return $http.post('/posts/' + id + '/comments', comment, {
+      //pass auth JWT token as an Authorization header
+      headers: {Authorization: 'Bearer ' + auth.getToken()}
+    });
   };
   //upvote comments
   o.upvoteComment = function(post, comment){
-    return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/upvote').success(function(data){
+    return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/upvote', null, {
+      //pass auth JWT token as an Authorization header
+      headers: {Authorization: 'Bearer ' + auth.getToken()}
+    }).success(function(data){
       comment.upvotes += 1;
     });
   };
@@ -99,9 +111,11 @@ app.factory('auth', ['$http', '$window', function($http, $window){
 app.controller('MainCtrl', [
     '$scope',
     'posts',
-    function($scope, posts){
+    'auth',
+    function($scope, posts, auth){
         $scope.posts = posts.posts;
-
+        $scope.isLoggedIn = auth.isLoggedIn;
+        
         //add a new post (link is optional)
         $scope.addPost = function(){
           //prevent user from entering blank title
@@ -130,9 +144,11 @@ app.controller('PostsCtrl', [
 '$scope',
 'posts',
 'post',
-function($scope, posts, post){ //has access to posts factory
+'auth',
+function($scope, posts, post, auth){ //has access to posts factory
     $scope.post = post; //$scope.post two way binding to the frontend ng-repeat=post in posts
-
+    $scope.isLoggedIn = auth.isLoggedIn;
+    
     //add a comment to a post
     $scope.addComment = function(){
       if($scope.body === '') {
@@ -152,6 +168,17 @@ function($scope, posts, post){ //has access to posts factory
       posts.upvoteComment(post, comment);
     };
     
+}]);
+
+//controller for navbar
+app.controller('NavCtrl', [
+'$scope',
+'auth',
+function($scope, auth){
+  //expose methods from auth factory
+  $scope.isLoggedIn = auth.isLoggedIn;
+  $scope.currentUser = auth.currentUser;
+  $scope.logOut = auth.logOut;
 }]);
 
 app.controller('AuthCtrl', [
@@ -208,6 +235,31 @@ function($stateProvider, $urlRouterProvider){
           return posts.get($stateParams.id);
         }]
       }
+    });
+    
+    //login state (accessible once logged in)
+    $stateProvider.state('login', {
+      url: '/login',
+      templateUrl: '/login.html',
+      controller: 'AuthCtrl',
+      onEnter: ['$state', 'auth', function($state, auth){
+        if(auth.isLoggedIn()){
+          //if logged in then proceed to home
+          $state.go('home');
+        }
+      }]
+    });
+    
+    //register state (accessible once logged in)
+    $stateProvider.state('register', {
+      url: '/register',
+      templateUrl: '/register.html',
+      controller: 'AuthCtrl',
+      onEnter: ['$state', 'auth', function($state, auth){
+        if(auth.isLoggedIn()){
+          $state.go('home');
+        }
+      }]
     });
 
     $urlRouterProvider.otherwise('home');
