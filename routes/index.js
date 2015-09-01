@@ -6,9 +6,15 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+var jwt = require('express-jwt');
+var passport = require('passport');
 var mongoose = require('mongoose');
 var Post = mongoose.model('Post');
 var Comment = mongoose.model('Comment');
+var User = mongoose.model('User');
+
+//middleware for authenticating jwt tokens
+var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
 //Note: Use this url for curl instead of localhost:3000: https://mean-news-app-kshen3778.c9.io/
 //GET all posts
@@ -22,8 +28,9 @@ router.get('/posts', function(req,res,next){
 });
 
 //POST create a post
-router.post('/posts', function(req, res, next){
+router.post('/posts', auth, function(req, res, next){
    var post = new Post(req.body); //create a new post with user input info
+   post.author = req.payload.username; //authenticated user
    
    post.save(function(err, post){
       if(err){ return next(err); } 
@@ -60,7 +67,7 @@ router.get('/posts/:post', function(req,res,next){
 });
 
 //upvote a post
-router.put('/posts/:post/upvote', function(req,res,next){
+router.put('/posts/:post/upvote', auth, function(req,res,next){
    req.post.upvote(function(err, post){
       if(err){
           return next(err);
@@ -70,9 +77,10 @@ router.put('/posts/:post/upvote', function(req,res,next){
 });
 
 //create comment route for a post
-router.post('/posts/:post/comments', function(req, res, next){
+router.post('/posts/:post/comments', auth, function(req, res, next){
    var comment = new Comment(req.body);
    comment.post = req.post; //set the Comment Schema's post field to the selected post
+   comment.author = req.payload.username; //authenticated user
    
    comment.save(function(err, comment){
       if(err){
@@ -108,8 +116,8 @@ router.param('comment', function(req,res,next,id){
 });
 
 //upvote a comment
-router.put('/posts/:post/comments/:comment/upvote', function(req,res,next){
-   //call Comment schema's upvote method
+router.put('/posts/:post/comments/:comment/upvote', auth, function(req,res,next){
+   //call Comment schema's upvote method on :comment
    req.comment.upvote(function(err, comment){
       if(err){
           return next(err);
@@ -118,6 +126,45 @@ router.put('/posts/:post/comments/:comment/upvote', function(req,res,next){
    });
 });
 
+//passport register route
+router.post('/register', function(req, res, next){
+   if(!req.body.username || !req.body.password){
+      return res.status(400).json({message: 'Please fill out all fields'});
+   }
+   
+   var user = new User();
+   
+   user.username = req.body.username;
+   user.setPassword(req.body.password);
+   
+   user.save(function(err){
+      if(err){
+         return next(err);
+      }
+      //if registration is successful then return a JWT token to client
+      return res.json({token: user.generateJWT()});
+   });
+   
+});
+
+//passport login route
+router.post('/login', function(req,res,next){
+   if(!req.body.username || !req.body.password){
+      return res.status(400).json({message: 'please fill out all fields'});
+   }
+   
+   passport.authenticate('local', function(err, user, info){
+      if(err){
+         return next(err);
+      }
+      if(user){
+         //if authentication is successful return a JWT token to client
+         return res.json({token: user.generateJWT()});
+      } else{
+         return res.status(401).json(info);
+      }
+   })(req,res,next);
+});
 
 module.exports = router;
 
