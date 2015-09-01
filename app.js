@@ -9,9 +9,8 @@ var passport = require('passport');
 
 //Connect to MongoDB Mongoose instance
 var mongoose = require("mongoose");
-//require('./models/Posts');
-//require('./models/Comments');
 //mongoose.connect("mongodb://kshen3778@gmail.com:qazwsx1703@" + process.env.IP + ":" + process.env.PORT + "/news");
+//to delete everything in the 'news' database: mongo kshen3778-mean-news-app-1800429:27017/news  --eval "db.dropDatabase();"
 mongoose.connect("mongodb://kshen3778-mean-news-app-1800429:27017/news");
 require('./models/Posts');
 require('./models/Comments');
