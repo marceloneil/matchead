@@ -2,11 +2,9 @@ var mongoose = require('mongoose');
 
 var CompanySchema = new mongoose.Schema({
    twittername: String,
-   libertarian: Number,
-   green: Number,
-   liberal: Number,
-   conservative: Number
-      
+   sentiment: Object,
+   political: Object,
+   personality: Object
 
 });
 

@@ -3,6 +3,8 @@ var router = express.Router();
 var indico = require('indico.io');
 indico.apiKey = process.env.indico;
 
+var Twitter = require('twitter');
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -14,19 +16,85 @@ var mongoose = require('mongoose');
 var Post = mongoose.model('Post');
 var Comment = mongoose.model('Comment');
 var User = mongoose.model('User');
+var Company = mongoose.model('Company');
 
 //middleware for authenticating jwt tokens
 var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
+var client = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
+});
+
+
+
 router.post('/analyze', function(req,res,next){
    console.log("text analysis");
-   console.log(req.body.text);   
-   indico.sentimentHQ(req.body.text).then(function(result1) {
-    console.log(result1);
-    res.json(result1);
-  }).catch(function(err) {
-    console.warn(err);
-  });
+   /*indico.personas("I only stay home on Saturday nights to read.")
+      .then(function(response){
+         console.log(response);
+      });*/
+      
+    
+    //get company tweets
+    var params = {screen_name: req.body.company, trim_user: 0, exclude_replies: 1};
+    client.get('statuses/user_timeline', params, function(error, tweets, response){
+        if (!error) {
+          var companyPosts = [];
+          for(var i = 0; i < tweets.length; i++){
+             companyPosts.push(tweets[i].text);
+          }
+          
+          indico.analyzeText(companyPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result) {
+             console.log("Company Tweet Analysis");
+             //console.log(result);
+             var co = new Company();
+             co.twittername = req.body.company;
+             co.political = result.political;
+             co.sentiment = result.sentiment_hq;
+             co.personality = result.personality;
+             //co.persona = result.personas;
+             console.log(co);
+             
+             co.save(function(err, comp){
+                //console.log(err);
+               if(err){
+                  return next(err); 
+                  
+               } 
+               console.log("1");
+               params = {screen_name: req.body.person, trim_user: 0, exclude_replies: 1};
+                  client.get('statuses/user_timeline', params, function(error, tweets, response){
+                     console.log("2");
+                     if(!error){
+                        console.log("3");
+                        var personalPosts = [];
+                         for(var i = 0; i < tweets.length; i++){
+                            personalPosts.push(tweets[i].text);
+                         }
+                         console.log("4");
+                        //personal tweets
+                        indico.analyzeText(personalPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result2) {
+                           console.log("Personal Tweets analysis");
+                           console.log(result2);
+                           res.json(comp);
+                           
+                        });
+                     }
+               
+               });
+
+             });
+             
+          }).catch(function(err) {
+            console.warn(err);
+          });
+        }
+    });
+   
+
 });
 
 //GET all posts

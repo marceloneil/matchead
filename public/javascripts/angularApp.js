@@ -150,13 +150,10 @@ app.controller('TextCtrl', [
         $scope.isLoggedIn = auth.isLoggedIn;
         
         $scope.analyze = function(){
-          console.log($scope.text);
+          console.log($scope.person);
+          console.log($scope.company);
           
-          $http.post('/analyze', {text: $scope.text}).then(function(data) {
-            console.log(JSON.stringify(data));
-            $scope.sentiment = data.data.split(" ")[0];
-            //console.log(JSON.parse(data.data.split(" ")[1]));
-            //$scope.political = JSON.stringify(data.data.split(" ")[1]);
+          $http.post('/analyze', {company: $scope.company}).then(function(data) {
   
           });
         };

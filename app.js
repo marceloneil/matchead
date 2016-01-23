@@ -14,6 +14,7 @@ mongoose.connect(mongo);
 require('./models/Posts');
 require('./models/Comments');
 require('./models/User');
+require('./models/Company');
 require('./config/passport');
 var routes = require('./routes/index');
 var users = require('./routes/users');
