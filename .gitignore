@@ -34,3 +34,6 @@ node_modules
 
 # Cloud9
 .c9
+
+#Mongo
+.data

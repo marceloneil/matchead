@@ -49,14 +49,20 @@ router.post('/analyze', function(req,res,next){
           
           indico.analyzeText(companyPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result) {
              console.log("Company Tweet Analysis");
+             var averageCompanySentiment = 0
+             for(var i = 0; i < result.sentiment_hq.length; i++){
+               averageCompanySentiment += result.sentiment_hq[i];
+             }
+             averageCompanySentiment /= result.sentiment_hq.length;
+             console.log(averageCompanySentiment);
              //console.log(result);
              var co = new Company();
              co.twittername = req.body.company;
              co.political = result.political;
-             co.sentiment = result.sentiment_hq;
+             co.sentiment = averageCompanySentiment;
              co.personality = result.personality;
              //co.persona = result.personas;
-             console.log(co);
+             //console.log(co);
              
              co.save(function(err, comp){
                 //console.log(err);
@@ -64,21 +70,25 @@ router.post('/analyze', function(req,res,next){
                   return next(err); 
                   
                } 
-               console.log("1");
                params = {screen_name: req.body.person, trim_user: 0, exclude_replies: 1};
                   client.get('statuses/user_timeline', params, function(error, tweets, response){
-                     console.log("2");
                      if(!error){
-                        console.log("3");
                         var personalPosts = [];
                          for(var i = 0; i < tweets.length; i++){
                             personalPosts.push(tweets[i].text);
                          }
-                         console.log("4");
                         //personal tweets
                         indico.analyzeText(personalPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result2) {
                            console.log("Personal Tweets analysis");
-                           console.log(result2);
+                           //console.log(result2);
+                           var averagePersonalSentiment = 0
+                           for(var i = 0; i < result2.sentiment_hq.length; i++){
+                              averagePersonalSentiment += result2.sentiment_hq[i];
+                           }
+                           averagePersonalSentiment /= result2.sentiment_hq.length;
+                           console.log(averagePersonalSentiment);
+                           console.log(Math.abs(averageCompanySentiment-averagePersonalSentiment));
+                           
                            res.json(comp);
                            
                         });

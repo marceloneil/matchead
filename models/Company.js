@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 var CompanySchema = new mongoose.Schema({
    twittername: String,
-   sentiment: Object,
+   sentiment: Number,
    political: Object,
    personality: Object
 
