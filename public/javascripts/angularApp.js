@@ -154,7 +154,16 @@ app.controller('TextCtrl', [
           console.log($scope.company);
           
           $http.post('/analyze', {company: $scope.company}).then(function(data) {
-  
+            
+            console.log(data);
+            
+            $scope.companySentiment = data.data.csent;
+            $scope.companyPolitical = data.data.cpolitical;
+            $scope.companyPersonality = data.data.cpersonality;
+            
+            $scope.personalSentiment = data.data.psent;
+            $scope.personalPolitical = data.data.ppolitical;
+            $scope.personalPersonality = data.data.ppersonality;
           });
         };
         

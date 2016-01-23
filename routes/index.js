@@ -38,73 +38,145 @@ router.post('/analyze', function(req,res,next){
       });*/
       
     
-    //get company tweets
-    var params = {screen_name: req.body.company, trim_user: 0, exclude_replies: 1};
-    client.get('statuses/user_timeline', params, function(error, tweets, response){
-        if (!error) {
-          var companyPosts = [];
-          for(var i = 0; i < tweets.length; i++){
-             companyPosts.push(tweets[i].text);
+ //get company tweets
+ var params = {screen_name: req.body.company, trim_user: 0, exclude_replies: 1};
+ client.get('statuses/user_timeline', params, function(error, tweets, response){
+   if (!error) {
+      // Parse company tweets
+      var companyPosts = [];
+      for(var i = 0; i < tweets.length; i++){
+         companyPosts.push(tweets[i].text);
+      }
+       
+      indico.analyzeText(companyPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result) {
+         // Company Tweet Analysis
+         console.log("\n\nCompany Tweet Analysis\n");
+         
+         //
+         // Averaging Company Sentiment
+         //
+         var averageCompanySentiment = 0;
+         for(var i = 0; i < result.sentiment_hq.length; i++){
+            averageCompanySentiment += result.sentiment_hq[i];
+         }
+         averageCompanySentiment /= result.sentiment_hq.length;
+         
+         console.log("Average Comapny Sentiment: " + averageCompanySentiment);
+         
+         //
+         // Averaging Company Political Views
+         //
+         var averageCompanyPolitical = [0,0,0,0];
+         for(var i = 0; i < result.political.length; i++){
+            averageCompanyPolitical[0] += result.political[i].Libertarian;
+            averageCompanyPolitical[1] += result.political[i].Green;
+            averageCompanyPolitical[2] += result.political[i].Liberal;
+            averageCompanyPolitical[3] += result.political[i].Conservative;
           }
+         for(var a = 0; a < 4; a++){
+            averageCompanyPolitical[a] /= result.political.length;
+         }
+         
+         console.log("Average Company Political Views: " + JSON.stringify(averageCompanyPolitical));
+         
+         //
+         // Averaging Company Personality
+         //
+         var averageCompanyPersonality = [0,0,0,0];
+         for(var i = 0; i < result.personality.length; i++){
+            averageCompanyPersonality[0] += result.personality[i].openness;
+            averageCompanyPersonality[1] += result.personality[i].extraversion;
+            averageCompanyPersonality[2] += result.personality[i].agreeableness;
+            averageCompanyPersonality[3] += result.personality[i].conscientiousness;
+         }
+         for(var a = 0; a < 4; a++){
+            averageCompanyPersonality[a] /= result.personality.length;
+         }
+         
+         console.log("Average Company Personality: " + JSON.stringify(averageCompanyPersonality));
+         // 
+         // Store parsed company tweets to database
+         //
+         var co = new Company();
+         co.twittername = req.body.company;
+         co.political = averageCompanyPolitical;
+         co.sentiment = averageCompanySentiment;
+         co.personality = averageCompanyPersonality;
           
-          indico.analyzeText(companyPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result) {
-             console.log("Company Tweet Analysis");
-             var averageCompanySentiment = 0
-             for(var i = 0; i < result.sentiment_hq.length; i++){
-               averageCompanySentiment += result.sentiment_hq[i];
-             }
-             averageCompanySentiment /= result.sentiment_hq.length;
-             console.log(averageCompanySentiment);
-             //console.log(result);
-             var co = new Company();
-             co.twittername = req.body.company;
-             co.political = result.political;
-             co.sentiment = averageCompanySentiment;
-             co.personality = result.personality;
-             //co.persona = result.personas;
-             //console.log(co);
-             
-             co.save(function(err, comp){
-                //console.log(err);
-               if(err){
-                  return next(err); 
+         co.save(function(err, comp){
+            //console.log(err);
+            if(err){
+               return next(err); 
+            }
+            
+         params = {screen_name: req.body.person, trim_user: 0, exclude_replies: 1};
+         client.get('statuses/user_timeline', params, function(error, tweets, response){
+            if(!error){
+               // Parse personal tweets
+               var personalPosts = [];
+                for(var i = 0; i < tweets.length; i++){
+                   personalPosts.push(tweets[i].text);
+                }
+               indico.analyzeText(personalPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result2) {
+                  console.log("\n\nPersonal Tweet Analysis\n");
                   
-               } 
-               params = {screen_name: req.body.person, trim_user: 0, exclude_replies: 1};
-                  client.get('statuses/user_timeline', params, function(error, tweets, response){
-                     if(!error){
-                        var personalPosts = [];
-                         for(var i = 0; i < tweets.length; i++){
-                            personalPosts.push(tweets[i].text);
-                         }
-                        //personal tweets
-                        indico.analyzeText(personalPosts,{apis: ['sentiment_hq','political','personality']}).then(function(result2) {
-                           console.log("Personal Tweets analysis");
-                           //console.log(result2);
-                           var averagePersonalSentiment = 0
-                           for(var i = 0; i < result2.sentiment_hq.length; i++){
-                              averagePersonalSentiment += result2.sentiment_hq[i];
-                           }
-                           averagePersonalSentiment /= result2.sentiment_hq.length;
-                           console.log(averagePersonalSentiment);
-                           console.log(Math.abs(averageCompanySentiment-averagePersonalSentiment));
-                           
-                           res.json(comp);
-                           
-                        });
-                     }
-               
+                  //
+                  // Averaging Personal Sentiment
+                  //
+                  var averagePersonalSentiment = 0;
+                  for(var i = 0; i < result2.sentiment_hq.length; i++){
+                     averagePersonalSentiment += result2.sentiment_hq[i];
+                  }
+                  averagePersonalSentiment /= result2.sentiment_hq.length;
+                  
+                  console.log("Average Personal Sentiment: " + averagePersonalSentiment);
+                  
+                  //
+                  // Averaging Personal Political Views
+                  //
+                  var averagePersonalPolitical = [0,0,0,0];
+                  for(var i = 0; i < result2.political.length; i++){
+                     averagePersonalPolitical[0] += result2.political[i].Libertarian;
+                     averagePersonalPolitical[1] += result2.political[i].Green;
+                     averagePersonalPolitical[2] += result2.political[i].Liberal;
+                     averagePersonalPolitical[3] += result2.political[i].Conservative;
+                  }
+                  for(var a = 0; a < 4; a++){
+                     averagePersonalPolitical[a] /= result2.political.length;
+                  }
+                  
+                  console.log("Average Personal Political Views: " + JSON.stringify(averagePersonalPolitical));
+                  
+                  //
+                  // Averaging Personal Personality
+                  //
+                  var averagePersonalPersonality = [0,0,0,0];
+                  for(var i = 0; i < result2.personality.length; i++){
+                     averagePersonalPersonality[0] += result2.personality[i].openness;
+                     averagePersonalPersonality[2] += result2.personality[i].agreeableness;
+                     averagePersonalPersonality[1] += result2.personality[i].extraversion;
+                     averagePersonalPersonality[3] += result2.personality[i].conscientiousness;
+                  }
+                  for(var a = 0; a < 4; a++){
+                     averagePersonalPersonality[a] /= result2.personality.length;
+                  }
+                  
+                  console.log("Average Personal Personality: " + JSON.stringify(averagePersonalPersonality));
+                  
+                  //console.log("Sentiment Difference: " + Math.abs(averageCompanySentiment-averagePersonalSentiment));
+                  
+                  res.json({ csent: averageCompanySentiment, cpolitical: averageCompanyPolitical, cpersonality: averageCompanyPersonality, psent: averagePersonalSentiment, ppolitical: averagePersonalPolitical, ppersonality: averagePersonalPersonality });
+                  
                });
-
-             });
-             
-          }).catch(function(err) {
-            console.warn(err);
-          });
-        }
-    });
-   
-
+            }
+         });
+      });
+          
+       }).catch(function(err) {
+         console.warn(err);
+       });
+     }
+ });
 });
 
 //GET all posts
