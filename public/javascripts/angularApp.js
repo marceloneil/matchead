@@ -1,4 +1,9 @@
-var app = angular.module('flapperNews', ['ui.router']);
+
+
+angular.module('chart.js',[]);
+var charts = angular.module('myModule',['chart.js']);
+var app = angular.module('flapperNews', ['ui.router', 'myModule']);
+//var chartApp = angular.module('myApp', ['chart.js']);
 app.factory('posts', ['$http', 'auth', function($http, auth){
   var o = {
     posts: []
@@ -141,7 +146,7 @@ app.controller('MainCtrl', [
     }
 ]);
 
-app.controller('TextCtrl', [
+charts.controller('TextCtrl', [
     '$scope',
     'auth',
     '$http',
@@ -149,11 +154,20 @@ app.controller('TextCtrl', [
 
         $scope.isLoggedIn = auth.isLoggedIn;
         
+       /* $scope.testlabels =["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"];
+
+  $scope.testdata = [
+    [65, 59, 90, 81, 56, 55, 40],
+    [28, 48, 40, 19, 96, 27, 100]
+  ];*/
+        //console.log($scope.testdata);
+        
         $scope.analyze = function(){
           console.log($scope.person);
           console.log($scope.company);
           
-          $http.post('/analyze', {company: $scope.company}).then(function(data) {
+          
+          $http.post('/analyze', {person: $scope.person, company: $scope.company}).then(function(data) {
             
             console.log(data);
             
@@ -164,6 +178,20 @@ app.controller('TextCtrl', [
             $scope.personalSentiment = data.data.psent;
             $scope.personalPolitical = data.data.ppolitical;
             $scope.personalPersonality = data.data.ppersonality;
+            
+            $scope.labels =["Libertarian", "Green", "Liberal", "Conservative"];
+            
+            $scope.data = [
+              [data.data.cpolitical[0]*100, data.data.cpolitical[1]*100, data.data.cpolitical[2]*100, data.data.cpolitical[3]*100],
+              [data.data.ppolitical[0]*100, data.data.ppolitical[1]*100, data.data.ppolitical[2]*100, data.data.ppolitical[3]*100]
+              
+            ];
+            /*console.log(0);
+            $scope.data = [data.data.cpolitical[0], data.data.cpolitical[1], data.data.cpolitical[2], data.data.cpolitical[3]];
+            console.log(1);
+            $scope.data2 = [data.data.ppolitical[0], data.data.ppolitical[1], data.data.ppolitical[2], data.data.ppolitical[3]];
+            console.log(2);*/
+            
           });
         };
         
@@ -260,6 +288,7 @@ function($stateProvider, $urlRouterProvider){
       url: '/texts',
       templateUrl: '/text.html',
       controller: 'TextCtrl'
+      
     });
 
     //posts and comments
