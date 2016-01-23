@@ -88,8 +88,10 @@ app.factory('auth', ['$http', '$window', function($http, $window){
   
   //register the user and save the token returned
   auth.register = function(user){
+    console.log(user);
     return $http.post('/register', user).success(function(data){
       auth.saveToken(data.token);
+      console.log(user);
     });
   };
   
@@ -150,11 +152,9 @@ app.controller('TextCtrl', [
         $scope.analyze = function(){
           console.log($scope.text);
           
-          $http.get('/analyze').then(function(data) {
+          $http.post('/analyze', {text: $scope.text}).then(function(data) {
             console.log(data);
             //$scope.sentiment = data;
-          }).error(function(err){
-            console.log(err);
           });
         };
         

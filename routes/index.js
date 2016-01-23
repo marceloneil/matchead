@@ -18,17 +18,18 @@ var User = mongoose.model('User');
 //middleware for authenticating jwt tokens
 var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
-router.get('/analyze', function(req,res,next){
+router.post('/analyze', function(req,res,next){
    console.log("text analysis");
-   indico.sentimentHQ("Hello World!")
-  .then(function(res) {
-    console.log(res);
+   console.log(req.body.text);
+   indico.sentimentHQ(req.body.text)
+  .then(function(result) {
+    console.log(result);
+    res.json(result);
   }).catch(function(err) {
     console.warn(err);
   });
 });
 
-//Note: Use this url for curl instead of localhost:3000: https://mean-news-app-kshen3778.c9.io/
 //GET all posts
 router.get('/posts', function(req,res,next){
     //retrieve all posts in JSON format
