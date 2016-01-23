@@ -139,6 +139,28 @@ app.controller('MainCtrl', [
     }
 ]);
 
+app.controller('TextCtrl', [
+    '$scope',
+    'auth',
+    '$http',
+    function($scope, auth, $http){
+
+        $scope.isLoggedIn = auth.isLoggedIn;
+        
+        $scope.analyze = function(){
+          console.log($scope.text);
+          
+          $http.get('/analyze').then(function(data) {
+            console.log(data);
+            //$scope.sentiment = data;
+          }).error(function(err){
+            console.log(err);
+          });
+        };
+        
+    }
+]);
+
 //will control a post's comments
 app.controller('PostsCtrl', [
 '$scope',
@@ -223,6 +245,12 @@ function($stateProvider, $urlRouterProvider){
           return posts.getAll();
         }]
       }
+    });
+    
+    $stateProvider.state('texts', {
+      url: '/texts',
+      templateUrl: '/text.html',
+      controller: 'TextCtrl'
     });
 
     //posts and comments

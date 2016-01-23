@@ -4,14 +4,13 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongo = process.env.mongo;
 
 var passport = require('passport');
 
 //Connect to MongoDB Mongoose instance
 var mongoose = require("mongoose");
-//mongoose.connect("mongodb://kshen3778@gmail.com:qazwsx1703@" + process.env.IP + ":" + process.env.PORT + "/news");
-//to delete everything in the 'news' database: mongo kshen3778-mean-news-app-1800429:27017/news  --eval "db.dropDatabase();"
-mongoose.connect("mongodb://kshen3778-mean-news-app-1800429:27017/news");
+mongoose.connect(mongo);
 require('./models/Posts');
 require('./models/Comments');
 require('./models/User');

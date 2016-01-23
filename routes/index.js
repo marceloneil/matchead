@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var indico = require('indico.io');
+indico.apiKey = process.env.indico;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -15,6 +17,16 @@ var User = mongoose.model('User');
 
 //middleware for authenticating jwt tokens
 var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
+
+router.get('/analyze', function(req,res,next){
+   console.log("text analysis");
+   indico.sentimentHQ("Hello World!")
+  .then(function(res) {
+    console.log(res);
+  }).catch(function(err) {
+    console.warn(err);
+  });
+});
 
 //Note: Use this url for curl instead of localhost:3000: https://mean-news-app-kshen3778.c9.io/
 //GET all posts

@@ -150,5 +150,25 @@
             </form>
         </script>
         
+        <script type="text/ng-template" id="/text.html">
+            <div class="page-header">
+                <h1>Indico</h1>
+            </div>
+            
+            <div ng-show="error" class="alert alert-danger row">
+                <span>{{ error.message }}</span>
+            </div>
+            
+            <form ng-submit="analyze()" style="margin-top:30px;">
+                <h3>Enter Text</h3>
+                
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Your Text" ng-model="text"></input>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Analyze</button>
+            </form>
+        </script>
+        
     </body>
 </html>
