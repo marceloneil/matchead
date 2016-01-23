@@ -20,11 +20,10 @@ var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
 router.post('/analyze', function(req,res,next){
    console.log("text analysis");
-   console.log(req.body.text);
-   indico.sentimentHQ(req.body.text)
-  .then(function(result) {
-    console.log(result);
-    res.json(result);
+   console.log(req.body.text);   
+   indico.sentimentHQ(req.body.text).then(function(result1) {
+    console.log(result1);
+    res.json(result1);
   }).catch(function(err) {
     console.warn(err);
   });

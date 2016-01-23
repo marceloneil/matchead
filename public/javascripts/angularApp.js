@@ -153,8 +153,11 @@ app.controller('TextCtrl', [
           console.log($scope.text);
           
           $http.post('/analyze', {text: $scope.text}).then(function(data) {
-            console.log(data);
-            //$scope.sentiment = data;
+            console.log(JSON.stringify(data));
+            $scope.sentiment = data.data.split(" ")[0];
+            //console.log(JSON.parse(data.data.split(" ")[1]));
+            //$scope.political = JSON.stringify(data.data.split(" ")[1]);
+  
           });
         };
         

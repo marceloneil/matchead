@@ -159,11 +159,14 @@
                 <span>{{ error.message }}</span>
             </div>
             
+            <h2> Sentiment of Text: {{sentiment}} </h2>
+           
+            
             <form ng-submit="analyze()" style="margin-top:30px;">
                 <h3>Enter Text</h3>
                 
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Your Text" ng-model="text"></input>
+                    <input type="text" class="form-control textbox_size" placeholder="Your Text" ng-model="text"></input>
                 </div>
                 
                 <button type="submit" class="btn btn-primary">Analyze</button>
