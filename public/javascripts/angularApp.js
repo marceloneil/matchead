@@ -171,20 +171,26 @@ charts.controller('TextCtrl', [
             
             console.log(data);
             
-            $scope.companySentiment = data.data.csent;
+           /* $scope.companySentiment = data.data.csent;
             $scope.companyPolitical = data.data.cpolitical;
             $scope.companyPersonality = data.data.cpersonality;
             
             $scope.personalSentiment = data.data.psent;
             $scope.personalPolitical = data.data.ppolitical;
-            $scope.personalPersonality = data.data.ppersonality;
+            $scope.personalPersonality = data.data.ppersonality;*/
             
-            $scope.labels =["Libertarian", "Green", "Liberal", "Conservative"];
+            $scope.labels =["Sentiment", "Political View", "Extraversion", "Openness", "Agreeableness", "Conscientiousness"];
             
+            var largestValuePolitical = Math.max.apply(Math, data.data.cpolitical); //value of most dominant political view
+            var dominantCompanyPolitical = data.data.cpolitical.indexOf(Math.max.apply(Math, data.data.cpolitical)); //index of largest value
+            var personalPoliticalView = data.data.ppolitical[dominantCompanyPolitical]; //value of the person's political view of the company's political view
+            
+            //
+            // Define the data array
+            //
             $scope.data = [
-              [data.data.cpolitical[0]*100, data.data.cpolitical[1]*100, data.data.cpolitical[2]*100, data.data.cpolitical[3]*100],
-              [data.data.ppolitical[0]*100, data.data.ppolitical[1]*100, data.data.ppolitical[2]*100, data.data.ppolitical[3]*100]
-              
+              [data.data.csent, largestValuePolitical, data.data.cpersonality[0], data.data.cpersonality[1], data.data.cpersonality[2], data.data.cpersonality[3]],
+              [data.data.psent, personalPoliticalView, data.data.ppersonality[0], data.data.ppersonality[1], data.data.ppersonality[2], data.data.ppersonality[3]]
             ];
             /*console.log(0);
             $scope.data = [data.data.cpolitical[0], data.data.cpolitical[1], data.data.cpolitical[2], data.data.cpolitical[3]];
