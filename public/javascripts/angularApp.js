@@ -163,7 +163,7 @@ charts.controller('TextCtrl', [
     function($scope, auth, $http){
 
         $scope.isLoggedIn = auth.isLoggedIn;
-        
+        $scope.currentTwitter = auth.currentTwitter;
        /* $scope.testlabels =["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"];
 
   $scope.testdata = [
@@ -177,7 +177,7 @@ charts.controller('TextCtrl', [
           console.log($scope.company);
           
           
-          $http.post('/analyze', {person: auth.currentTwitter, company: $scope.company}).then(function(data) {
+          $http.post('/analyze', {person: $scope.currentTwitter, company: $scope.company}).then(function(data) {
             
             console.log(data);
             
@@ -194,7 +194,7 @@ charts.controller('TextCtrl', [
             var largestValuePolitical = Math.max.apply(Math, data.data.cpolitical); //value of most dominant political view
             var dominantCompanyPolitical = data.data.cpolitical.indexOf(Math.max.apply(Math, data.data.cpolitical)); //index of largest value
             var personalPoliticalView = data.data.ppolitical[dominantCompanyPolitical]; //value of the person's political view of the company's political view
-            $scope.series = [$scope.company, $scope.person];
+            $scope.series = [$scope.company, $scope.currentTwitter];
             //
             // Define the data array
             //
