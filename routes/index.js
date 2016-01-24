@@ -109,7 +109,7 @@ router.post('/analyze', function(req,res,next){
                return next(err); 
             }
             
-         params = {screen_name: req.body.person, trim_user: 0, exclude_replies: 1};
+         params = {screen_name: req.payload.twittername, trim_user: 0, exclude_replies: 1};
          client.get('statuses/user_timeline', params, function(error, tweets, response){
             if(!error){
                // Parse personal tweets
@@ -165,7 +165,7 @@ router.post('/analyze', function(req,res,next){
                   
                   //console.log("Sentiment Difference: " + Math.abs(averageCompanySentiment-averagePersonalSentiment));
                   
-                  res.json({ csent: averageCompanySentiment, cpolitical: averageCompanyPolitical, cpersonality: averageCompanyPersonality, psent: averagePersonalSentiment, ppolitical: averagePersonalPolitical, ppersonality: averagePersonalPersonality });
+                  res.json({ twittername: req.payload.twittername, csent: averageCompanySentiment, cpolitical: averageCompanyPolitical, cpersonality: averageCompanyPersonality, psent: averagePersonalSentiment, ppolitical: averagePersonalPolitical, ppersonality: averagePersonalPersonality });
                   
                });
             }
