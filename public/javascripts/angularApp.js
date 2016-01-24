@@ -91,6 +91,16 @@ app.factory('auth', ['$http', '$window', function($http, $window){
     }
   };
   
+  
+  //return twitter of user that's logged in
+  auth.currentTwitter = function(){
+    if(auth.isLoggedIn()){
+      var token = auth.getToken();
+      var payload = JSON.parse($window.atob(token.split('.')[1]));
+      return payload.twittername;
+    }
+  };
+  
   //register the user and save the token returned
   auth.register = function(user){
     console.log(user);
@@ -167,7 +177,7 @@ charts.controller('TextCtrl', [
           console.log($scope.company);
           
           
-          $http.post('/analyze', {person: $scope.person, company: $scope.company}).then(function(data) {
+          $http.post('/analyze', {person: auth.currentTwitter, company: $scope.company}).then(function(data) {
             
             console.log(data);
             
