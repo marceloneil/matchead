@@ -39,7 +39,7 @@ router.post('/analyze', function(req,res,next){
       
     
  //get company tweets
- var params = {screen_name: req.body.company, trim_user: 0, exclude_replies: 1};
+ var params = {screen_name: req.body.company, trim_user: 0, exclude_replies: 1; count: 50};
  client.get('statuses/user_timeline', params, function(error, tweets, response){
    if (!error) {
       // Parse company tweets
@@ -109,7 +109,7 @@ router.post('/analyze', function(req,res,next){
                return next(err); 
             }
             
-         params = {screen_name: req.body.person, trim_user: 0, exclude_replies: 1};
+         params = {screen_name: req.body.person, trim_user: 0, exclude_replies: 1; count: 50};
          client.get('statuses/user_timeline', params, function(error, tweets, response){
             if(!error){
                // Parse personal tweets

@@ -202,7 +202,7 @@ charts.controller('TextCtrl', [
               [data.data.csent, largestValuePolitical, data.data.cpersonality[0], data.data.cpersonality[1], data.data.cpersonality[2], data.data.cpersonality[3]],
               [data.data.psent, personalPoliticalView, data.data.ppersonality[0], data.data.ppersonality[1], data.data.ppersonality[2], data.data.ppersonality[3]]
             ];
-            console.log($scope.data);
+            //console.log($scope.data);
             /*console.log(0);
             $scope.data = [data.data.cpolitical[0], data.data.cpolitical[1], data.data.cpolitical[2], data.data.cpolitical[3]];
             console.log(1);
